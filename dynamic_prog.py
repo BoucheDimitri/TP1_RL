@@ -14,7 +14,7 @@ def greedy_policy(rvecs, pmats, v, gamma):
     pi = np.zeros((ns, ))
     for i in range(0, ns):
         pi[i] = np.argmax(rvecs[i] + gamma * np.dot(pmats[i], v))
-    return pi
+    return pi.astype(int)
 
 
 def value_iteration(rvecs, pmats, v0, gamma, maxits=10000, epsilon=0.01):
@@ -68,14 +68,17 @@ def policy_evaluation(rvecs, pmats, pi, gamma):
 
 
 def policy_iteration(rvecs, pmats, pi0, gamma, maxit=100):
-    vks = []
+    vks = [np.array([np.inf, np.inf, np.inf])]
+    ns = pi0.shape[0]
+    pikplus1 = np.copy(pi0)
     for k in range(0, maxit):
-        vk = policy_evaluation(rvecs, pmats, pi0, gamma)
-        vks.append(vk)
+        vk = policy_evaluation(rvecs, pmats, pikplus1, gamma)
+        vks.append(vk.reshape((ns, 1)))
         pikplus1 = greedy_policy(rvecs, pmats, vk, gamma)
-        if k!=0:
-            if vks[k + 1] == vks[k]:
-                return pikplus1
-    return pikplus1
+        if np.all(vks[k + 1] == vks[k]):
+            print("Yes")
+            return pikplus1, vks[1:]
+        print(k)
+    return pikplus1, vks[1:]
 
 

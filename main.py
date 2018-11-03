@@ -57,13 +57,27 @@ v_star = dp.policy_evaluation(rvecs, pmats, pi_star, gamma)
 # Question 1.2: Value iteration
 # Set nitial values to 0
 v0 = np.zeros((nstates, ))
-# Perform value iteration and record values history in hist_vit
-pi_vit, hist_vit = dp.value_iteration(rvecs, pmats, v0, gamma=0.95, epsilon=0.01)
+# Perform value iteration and record value vectors history in hist_vit
+pi_vit, hist_vit = dp.value_iteration(rvecs, pmats, v0, gamma, epsilon=0.01)
 # Get optimality gap along iterations in infinite norm
-opti_gap = dp.optimality_gap(hist_vit, v_star)
+opti_gap_vit = dp.optimality_gap(hist_vit, v_star)
 # Plot optimality gap
 plt.figure()
-plt.plot(opti_gap)
+plt.plot(opti_gap_vit, marker="o")
+plt.ylabel("$||v - v^*||_{\infty}$")
+plt.xlabel("Value iteration")
+
+
+# Question 1.3: Policy iteration
+# Initialize pi0 to [a0, a0, a0]
+pi0 = np.zeros((nstates, ), dtype=int)
+# Perform policy iteration and record value vectors history in hist_pit
+pi_pit, hist_pit = dp.policy_iteration(rvecs, pmats, pi0, gamma)
+# Get optimality gap along iterations in infinite norm
+opti_gap_pit = dp.optimality_gap(hist_pit, v_star)
+# Plot optimality gap
+plt.figure()
+plt.plot(opti_gap_pit, marker="o")
 plt.ylabel("$||v - v^*||_{\infty}$")
 plt.xlabel("iterations")
-
+plt.title("Policy iteration")
