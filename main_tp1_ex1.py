@@ -66,9 +66,10 @@ pi_vit, hist_vit = dp.value_iteration(rvecs, pmats, v0, gamma, epsilon=0.01)
 opti_gap_vit = dp.optimality_gap(hist_vit, v_star)
 # Plot optimality gap
 plt.figure()
-plt.plot(opti_gap_vit, marker="o")
+plt.plot(opti_gap_vit, marker="o", markersize=10)
 plt.ylabel("$||v - v^*||_{\infty}$")
-plt.xlabel("Value iteration")
+plt.xlabel("Number of value iterations")
+plt.title("Convergence of Value Iteration")
 
 
 # ########################## Question 1.3 #########################################################################
@@ -81,7 +82,7 @@ pi_pit, hist_pit = dp.policy_iteration(rvecs, pmats, pi0, gamma)
 opti_gap_pit = dp.optimality_gap(hist_pit, v_star)
 # Plot optimality gap
 plt.figure()
-plt.plot(opti_gap_pit, marker="o")
+plt.plot(opti_gap_pit, marker="o", markersize=10)
 plt.ylabel("$||v - v^*||_{\infty}$")
-plt.xlabel("iterations")
-plt.title("Policy iteration")
+plt.xlabel("Number of policy iterations")
+plt.title("Convergence of Policy Iteration")

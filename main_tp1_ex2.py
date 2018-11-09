@@ -47,7 +47,11 @@ j_mcs = exo2.j_mc_estimates(ngrid, pol, mu0_mc, env, Tmax, gamma)
 j_pi = np.dot(mu0_mc, v_q4)
 
 # Plot the result
+plt.figure()
 plt.plot(ngrid, j_mcs - j_pi)
+plt.title("Convergence of MC estimation of Value Function")
+plt.ylabel("$J - J^{\pi}$")
+plt.xlabel("MC iterations")
 
 
 # ########################## Question 1.5 #########################################################################
