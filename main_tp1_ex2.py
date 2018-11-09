@@ -1,86 +1,95 @@
-from gridworld import GridWorld1
-import gridrender as gui
+import gridworld
 import numpy as np
-import time
 import importlib
+import matplotlib.pyplot as plt
 
-import reinf_learning as rl
-importlib.reload(rl)
+import funcs_exo2 as exo2
 
-env = GridWorld1
+# Reload module, for dev
+importlib.reload(exo2)
 
-################################################################################
-# investigate the structure of the environment
-# - env.n_states: the number of states
-# - env.state2coord: converts state number to coordinates (row, col)
-# - env.coord2state: converts coordinates (row, col) into state number
-# - env.action_names: converts action number [0,3] into a named action
-# - env.state_actions: for each state stores the action availables
-#   For example
-#       print(env.state_actions[4]) -> [1,3]
-#       print(env.action_names[env.state_actions[4]]) -> ['down' 'up']
-# - env.gamma: discount factor
-################################################################################
-print(env.state2coord)
-print(env.coord2state)
-print(env.state_actions)
-for i, el in enumerate(env.state_actions):
-    print("s{}: {}".format(i, env.action_names[el]))
+# Plot parameters
+plt.rcParams.update({"font.size": 20})
 
-################################################################################
-# Policy definition
-# If you want to represent deterministic action you can just use the number of
-# the action. Recall that in the terminal states only action 0 (right) is
-# defined.
-# In this case, you can use gui.renderpol to visualize the policy
-################################################################################
-pol = [1, 2, 0, 0, 1, 1, 0, 0, 0, 0, 3]
-gui.render_policy(env, pol)
-
-################################################################################
-# Try to simulate a trajectory
-# you can use env.step(s,a, render=True) to visualize the transition
-################################################################################
-
-env.render = True
-state = 0
-fps = 1
-for i in range(5):
-        action = np.random.choice(env.state_actions[state])
-        nexts, reward, term = env.step(state,action)
-        state = nexts
-        time.sleep(1./fps)
-
-################################################################################
-# You can also visualize the q-function using render_q
-################################################################################
-# first get the maximum number of actions available
-max_act = max(map(len, env.state_actions))
-q = np.random.rand(env.n_states, max_act)
-gui.render_q(env, q)
-
+# Get environement
+env = gridworld.GridWorld1
 
 
 # ########################## Question 1.4 #########################################################################
 
 # Number of MC iterations
 nmc = 1000
+
 # Max length of trajectories
 Tmax = 10
-# DIscount factor
+
+# Discount factor
 gamma = 0.95
-# MC estimate for the policy pi
-v_mc = rl.mc_estimate_Vn(env, nmc, Tmax, gamma)
+
 # here the v-function and q-function to be used for question 4
 v_q4 = [0.87691855, 0.92820033, 0.98817903, 0.00000000, 0.67106071, -0.99447514, 0.00000000, -0.82847001, -0.87691855,
         -0.93358351, -0.99447514]
+
 # Estimate mu
-nest_mu0 = 100
-mu0_mc = rl.mc_estimate_mu0(env, nest_mu0)
+nest_mu0 = 1000
+mu0_mc = exo2.mc_estimate_mu0(env, nest_mu0)
+
+# Define the policy
+pol = [0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 3]
+
+# Set range for plot of J and J^pi
+nmax = 10000
+pace = 10
+ngrid = np.arange(100, nmax, pace)
+
+# Estimate J and J^pi
+j_mcs = exo2.j_mc_estimates(ngrid, pol, mu0_mc, env, Tmax, gamma)
+j_pi = np.dot(mu0_mc, v_q4)
+
+# Plot the result
+plt.plot(ngrid, j_mcs - j_pi)
 
 
-################################################################################
-# Work to do: Q5
-################################################################################
-v_opt = [0.87691855, 0.92820033, 0.98817903, 0.00000000, 0.82369294, 0.92820033, 0.00000000, 0.77818504, 0.82369294,
-         0.87691855, 0.82847001]
+# ########################## Question 1.5 #########################################################################
+
+# Params
+nactions = 4
+nstates = 11
+
+# Number of episodes
+nits = 100
+
+# Exploration parameter
+eps = 0.2
+
+# Initialize Q matrix and nvisits matrix with ones
+# We set the value of impossible (state, action)s to - np.inf
+Q = - np.inf * np.ones((nstates, nactions))
+nvisits = np.ones((nstates, nactions))
+for i in range(0, 11):
+    for j in env.state_actions[i]:
+        Q[i, j] = 1
+
+# Perform Q-learning and compute value function by MC at each episode
+Q, nvisits, vns, rewards = exo2.Qlearning(Q, nvisits, env, nits, Tmax, eps, gamma, nmc=10000)
+
+# Optimal value function
+v_star = np.array([0.877, 0.928, 0.988, 0, 0.824, 0.928, 0, 0.778, 0.824, 0.877, 0.828])
+
+# ||v_t - v*||_{\infty}
+opti_diff = np.max(np.abs(vns - v_star.reshape((11, 1))), axis=0)
+# Plot the difference
+plt.figure()
+plt.plot(opti_diff, marker="o",  markersize=10)
+plt.xlabel("Episode (=n)")
+plt.ylabel("$||v_n - v^*||_{\infty}$")
+
+# Plot cumulative mean of rewards
+plt.figure()
+plt.plot(np.cumsum(rewards)/np.arange(1, rewards.shape[0] + 1), marker="o", markersize=10)
+plt.title("Cumulative mean of reward as a function of Q learning episode")
+plt.xlabel("Episode")
+plt.ylabel("Cumulative mean of rewards")
+
+
+

@@ -2,7 +2,7 @@ import numpy as np
 import importlib
 import matplotlib.pyplot as plt
 
-import dynamic_prog as dp
+import funcs_exo1 as dp
 importlib.reload(dp)
 
 
