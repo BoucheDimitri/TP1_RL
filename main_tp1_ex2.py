@@ -2,6 +2,10 @@ from gridworld import GridWorld1
 import gridrender as gui
 import numpy as np
 import time
+import importlib
+
+import reinf_learning as rl
+importlib.reload(rl)
 
 env = GridWorld1
 
@@ -21,7 +25,7 @@ print(env.state2coord)
 print(env.coord2state)
 print(env.state_actions)
 for i, el in enumerate(env.state_actions):
-        print("s{}: {}".format(i, env.action_names[el]))
+    print("s{}: {}".format(i, env.action_names[el]))
 
 ################################################################################
 # Policy definition
@@ -55,12 +59,26 @@ max_act = max(map(len, env.state_actions))
 q = np.random.rand(env.n_states, max_act)
 gui.render_q(env, q)
 
-################################################################################
-# Work to do: Q4
-################################################################################
+
+
+# ########################## Question 1.4 #########################################################################
+
+# Number of MC iterations
+nmc = 1000
+# Max length of trajectories
+Tmax = 10
+# DIscount factor
+gamma = 0.95
+# MC estimate for the policy pi
+v_mc = rl.mc_estimate_Vn(env, nmc, Tmax, gamma)
 # here the v-function and q-function to be used for question 4
 v_q4 = [0.87691855, 0.92820033, 0.98817903, 0.00000000, 0.67106071, -0.99447514, 0.00000000, -0.82847001, -0.87691855,
         -0.93358351, -0.99447514]
+# Estimate mu
+nest_mu0 = 100
+mu0_mc = rl.mc_estimate_mu0(env, nest_mu0)
+
+
 ################################################################################
 # Work to do: Q5
 ################################################################################

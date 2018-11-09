@@ -1,88 +1,41 @@
+import gridworld
 import numpy as np
+import time
 import importlib
 import matplotlib.pyplot as plt
 
+import reinf_learning as rl
+importlib.reload(rl)
 
-import dynamic_prog as dp
-importlib.reload(dp)
+env = gridworld.GridWorld1
 
 
-# ########################## Question 1.1 #########################################################################
 
-# Number of states
-nstates = 3
 
-# Number of actions
-nactions = 3
 
-# List of transition matrices and reward matrices
-pmats = []
-rvecs = []
 
-# Initialize transition matrices and rewrd matrices to 0
-for k in range(0, nstates):
-    pmats.append(np.zeros((nstates, nstates)))
-    rvecs.append(np.zeros((nactions, )))
+# ########################## Question 1.4 #########################################################################
 
-# Transition matrix for state s0
-pmats[0][0, 0] = 0.55
-pmats[0][0, 1] = 0.45
-pmats[0][1, 0] = 0.3
-pmats[0][1, 1] = 0.7
-pmats[0][2, 0] = 1
-
-# Transition matrix for state s1
-pmats[1][0, 0] = 1
-pmats[1][1, 1] = 0.4
-pmats[1][1, 2] = 0.6
-pmats[1][2, 1] = 1
-
-# Transition matrix for state s0
-pmats[2][0, 1] = 1
-pmats[2][1, 1] = 0.6
-pmats[2][1, 2] = 0.4
-pmats[2][2, 2] = 1
-
-# Fill non negative values for rewards vectors
-rvecs[0][2] = 5 / 100
-rvecs[2][1] = 1
-rvecs[2][2] = 9 / 10
-
-# Set discount parameter to 0.95
+# Number of MC iterations
+nmc = 1000
+# Max length of trajectories
+Tmax = 10
+# DIscount factor
 gamma = 0.95
 
-# The optimal policy vector that we have guessed and its corresponding value vector
-pi_star = np.array([1, 1, 2])
-v_star = dp.policy_evaluation(rvecs, pmats, pi_star, gamma)
+# here the v-function and q-function to be used for question 4
+v_q4 = [0.87691855, 0.92820033, 0.98817903, 0.00000000, 0.67106071, -0.99447514, 0.00000000, -0.82847001, -0.87691855,
+        -0.93358351, -0.99447514]
+# Estimate mu
+nest_mu0 = 1000
+mu0_mc = rl.mc_estimate_mu0(env, nest_mu0)
 
+nmax = 10000
+pace = 10
+ngrid = np.arange(100, nmax, pace)
 
-# ########################## Question 1.2 #########################################################################
+# Estimate J and J^pi
+j_mcs = rl.j_mc_estimates(ngrid, mu0_mc, env, Tmax, gamma)
+j_pi = np.dot(mu0_mc, v_q4)
 
-# Question 1.2: Value iteration
-# Set nitial values to 0
-v0 = np.zeros((nstates, ))
-# Perform value iteration and record value vectors history in hist_vit
-pi_vit, hist_vit = dp.value_iteration(rvecs, pmats, v0, gamma, epsilon=0.01)
-# Get optimality gap along iterations in infinite norm
-opti_gap_vit = dp.optimality_gap(hist_vit, v_star)
-# Plot optimality gap
-plt.figure()
-plt.plot(opti_gap_vit, marker="o")
-plt.ylabel("$||v - v^*||_{\infty}$")
-plt.xlabel("Value iteration")
-
-
-# ########################## Question 1.3 #########################################################################
-
-# Initialize pi0 to [a0, a0, a0]
-pi0 = np.zeros((nstates, ), dtype=int)
-# Perform policy iteration and record value vectors history in hist_pit
-pi_pit, hist_pit = dp.policy_iteration(rvecs, pmats, pi0, gamma)
-# Get optimality gap along iterations in infinite norm
-opti_gap_pit = dp.optimality_gap(hist_pit, v_star)
-# Plot optimality gap
-plt.figure()
-plt.plot(opti_gap_pit, marker="o")
-plt.ylabel("$||v - v^*||_{\infty}$")
-plt.xlabel("iterations")
-plt.title("Policy iteration")
+plt.plot(ngrid, j_mcs - j_pi)
