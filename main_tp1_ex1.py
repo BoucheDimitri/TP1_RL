@@ -5,6 +5,11 @@ import matplotlib.pyplot as plt
 import funcs_exo1 as dp
 importlib.reload(dp)
 
+# Plot parameters
+plt.rcParams.update({"font.size": 30})
+plt.rcParams.update({"lines.linewidth": 5})
+plt.rcParams.update({"lines.markersize": 10})
+
 
 # ########################## Question 1.1 #########################################################################
 

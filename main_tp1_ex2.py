@@ -9,7 +9,10 @@ import funcs_exo2 as exo2
 importlib.reload(exo2)
 
 # Plot parameters
-plt.rcParams.update({"font.size": 20})
+plt.rcParams.update({"font.size": 30})
+plt.rcParams.update({"lines.linewidth": 5})
+plt.rcParams.update({"lines.markersize": 10})
+
 
 # Get environement
 env = gridworld.GridWorld1
@@ -17,14 +20,13 @@ env = gridworld.GridWorld1
 
 # ########################## Question 1.4 #########################################################################
 
-# Number of MC iterations
-nmc = 1000
-
-# Max length of trajectories
-Tmax = 10
-
 # Discount factor
 gamma = 0.95
+
+# Determination of Tmax
+delta = 0.2
+Tmax = int(-np.log(delta) / (1 - gamma))
+
 
 # here the v-function and q-function to be used for question 4
 v_q4 = [0.87691855, 0.92820033, 0.98817903, 0.00000000, 0.67106071, -0.99447514, 0.00000000, -0.82847001, -0.87691855,
@@ -61,10 +63,10 @@ nactions = 4
 nstates = 11
 
 # Number of episodes
-nits = 100
+nits = 70
 
 # Exploration parameter
-eps = 0.2
+eps = 0.1
 
 # Initialize Q matrix and nvisits matrix with ones
 # We set the value of impossible (state, action)s to - np.inf
@@ -91,7 +93,7 @@ plt.ylabel("$||v_n - v^*||_{\infty}$")
 # Plot cumulative mean of rewards
 plt.figure()
 plt.plot(np.cumsum(rewards)/np.arange(1, rewards.shape[0] + 1), marker="o", markersize=10)
-plt.title("Cumulative mean of reward as a function of Q learning episode")
+plt.title("Cumulative mean of rewards as a function of Q learning episode")
 plt.xlabel("Episode")
 plt.ylabel("Cumulative mean of rewards")
 
